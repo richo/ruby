@@ -310,6 +310,15 @@ binding_clone(VALUE self)
     return bindval;
 }
 
+/* :nodoc: */
+static VALUE
+binding_env(VALUE self)
+{
+    rb_binding_t *bind;
+    GetBindingPtr(self, bind);
+    return bind->env;
+}
+
 VALUE
 rb_binding_new_with_cfp(rb_thread_t *th, const rb_control_frame_t *src_cfp)
 {
@@ -2696,6 +2705,7 @@ Init_Binding(void)
     rb_undef_method(CLASS_OF(rb_cBinding), "new");
     rb_define_method(rb_cBinding, "clone", binding_clone, 0);
     rb_define_method(rb_cBinding, "dup", binding_dup, 0);
+    rb_define_method(rb_cBinding, "env", binding_env, 0);
     rb_define_method(rb_cBinding, "eval", bind_eval, -1);
     rb_define_method(rb_cBinding, "local_variable_get", bind_local_variable_get, 1);
     rb_define_method(rb_cBinding, "local_variable_set", bind_local_variable_set, 2);
