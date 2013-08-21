@@ -310,13 +310,35 @@ binding_clone(VALUE self)
     return bindval;
 }
 
+VALUE local_id2sym(ID val) {
+    return (((VALUE)(val)<<RUBY_SPECIAL_SHIFT)|SYMBOL_FLAG);
+}
+
+static int
+collect_local_variables_in_iseq(rb_iseq_t *iseq, const VALUE ary)
+{
+    int i;
+    if (!iseq) return 0;
+    for (i = 0; i < iseq->local_table_size; i++) {
+	ID lid = iseq->local_table[i];
+	if (rb_is_local_id(lid)) {
+	    rb_ary_push(ary, ID2SYM(lid));
+	}
+    }
+    return 1;
+}
+
 /* :nodoc: */
 static VALUE
 binding_env(VALUE self)
 {
+    VALUE ary = rb_ary_new();
     rb_binding_t *bind;
     GetBindingPtr(self, bind);
-    return bind->env;
+    rb_env_t *env = (rb_env_t*)bind->env;
+    rb_iseq_t *iseq = env->block.iseq;
+    collect_local_variables_in_iseq(iseq, ary);
+    return ary;
 }
 
 VALUE
